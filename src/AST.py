@@ -6,13 +6,6 @@ class Node(object):
         return self.print_tree()
 
 
-class Variable(Node):
-    def __init__(self, type, name, value):
-        self.type = type
-        self.name = name
-        self.value = value
-
-
 class Program(Node):
     def __init__(self, declarations, fundefs, instructions):
         self.declarations = declarations
@@ -150,34 +143,24 @@ class Id(Expression):
         self.id = id
 
 
-class Integer(Const):
-    def __init__(self, value):
-        Const.__init__(self, "int", value)
-
-
-class Float(Const):
-    def __init__(self, value):
-        Const.__init__(self, "float", value)
-
-
-class String(Const):
-    def __init__(self, value):
-        Const.__init__(self, "string", value)
-
-
 class BinExpr(Expression):
     def __init__(self, expr1, operator, expr2):
-        self.expr1, self.operator, self.expr2 = expr1, operator, expr2
+        self.expr1 = expr1
+        self.operator = operator
+        self.expr2 = expr2
 
 
 class ExpressionInParentheses(Expression):
     def __init__(self, expression, error):
-        self.expression, self.error = expression, error
+        self.expression = expression
+        self.error = error
 
 
 class IdWithParentheses(Expression):
     def __init__(self, id, expression_list, error):
-        self.id, self.expression_list, self.error = id, expression_list, error
+        self.id = id
+        self.expression_list = expression_list
+        self.error = error
 
 
 class ExpressionList(Node):
@@ -217,4 +200,6 @@ class ArgumentList(Node):
 
 class Argument(Node):
     def __init__(self, type, id):
-        self.type, self.id = type, id
+        self.type = type
+        self.id = id
+

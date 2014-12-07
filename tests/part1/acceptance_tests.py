@@ -5,20 +5,17 @@ from ply import yacc
 from test_data import sample_input, expected_output
 from src.parser import Cparser
 import src.tree_printer
+from tests.with_mocked_stdout_test_class import BaseASTParsingTestClass
 
 __author__ = 'novy'
 
 
-class TestASTParsing(unittest.TestCase):
-
-    def setUp(self):
-        self.Cparser = Cparser()
-        self.mocked_stdout = StringIO()
-        sys.stdout = self.mocked_stdout
+class TestASTParsing(BaseASTParsingTestClass):
 
     def test_printing_ast_tree(self):
         parser = yacc.yacc(module=self.Cparser)
-        parser.parse(sample_input, lexer=self.Cparser.scanner)
+        ast = parser.parse(sample_input, lexer=self.Cparser.scanner)
+        ast.print_tree(0)
 
         self.assertEqual(
             self.mocked_stdout.getvalue(), expected_output
