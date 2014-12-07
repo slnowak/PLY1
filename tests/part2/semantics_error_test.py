@@ -43,6 +43,20 @@ int a = "string";
 a = 15;
 """
 
+with_duplicated_function_argument = """
+int a = 5, b = 10;
+
+int foo(int m, int n, int m) {
+    int res = 0;
+    return res;
+}
+
+while (a > b) {
+    a = a + 20;
+}
+
+"""
+
 
 class SemanticErrorTest(BaseASTParsingTestClass):
     def test_should_detect_using_undeclared_variable(self):
@@ -77,5 +91,12 @@ class SemanticErrorTest(BaseASTParsingTestClass):
         expected_error_message = """Value of type string cannot be assigned to symbol a of type int (line 1)"""
 
         self._parse_expression(with_wrong_inline_assignment)
+
+        self._assert_type_checker_prints_message(expected_error_message)
+
+    def test_should_detect_duplicated_function_parameters(self):
+        expected_error_message = """Duplicated usage of symbol m in line 3"""
+
+        self._parse_expression(with_duplicated_function_argument)
 
         self._assert_type_checker_prints_message(expected_error_message)

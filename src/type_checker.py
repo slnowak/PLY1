@@ -217,7 +217,7 @@ class TypeChecker(object):
             self.dispatch(arg, tab)
 
     def visit_Argument(self, node, tab):
-        if not node.id in tab.symbols:
+        if node.id in tab.symbols:
                 print "Duplicated usage of symbol {0} in line {1}".format(node.id, node.line - 1)
         else:
             tab.put(node.id, VariableSymbol(node.id, node.type, None))
