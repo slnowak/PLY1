@@ -59,21 +59,19 @@ class SymbolNotDeclaredError(Exception):
 class TypeChecker(object):
     def dispatch(self, node, *args):
         self.node = node
-        className = node.__class__.__name__
-        meth = getattr(self, 'visit_' + className)
-        return meth(node, *args)
+        classname = node.__class__.__name__
+        method = getattr(self, 'visit_' + classname)
+        return method(node, *args)
 
     def findVariable(self, tab, variable):
-        #print "finding:", variable, "in:", tab.symbols
-        if tab.symbols.has_key(variable):
+        if variable in tab.symbols:
             return tab.get(variable)
         elif tab.symbol.name == variable:
-            #print "Returning function symbol of type", tab.symbol.type
             return tab.symbol
         elif tab.get_parent_scope() is not None:
             return self.findVariable(tab.get_parent_scope(), variable)
-        else:
-            return None
+
+        return None
 
     def visit_Program(self, node):
         tab = SymbolTable(None, "program", None)
@@ -93,14 +91,9 @@ class TypeChecker(object):
             self.dispatch(init, tab, type)
 
     def visit_Init(self, node, tab, type):
-        #print "init:", node.id, type
-        errorOccured = False
-        for symbol in tab.symbols:
-            if symbol == node.id:
-                print "Duplicated usage of symbol {0} in line {1}".format(node.id, node.line - 1)
-                errorOccured = True
-                #raise DuplicatedSymbolError
-        if not errorOccured:
+        if node.id in tab.symbols:
+            print "Duplicated usage of symbol {0} in line {1}".format(node.id, node.line - 1)
+        else:
             tab.put(node.id, VariableSymbol(node.id, type, node.expression))
 
     def visit_Instructions(self, node, tab):
@@ -118,16 +111,15 @@ class TypeChecker(object):
 
     def visit_Assignment(self, node, tab):
         variable = self.findVariable(tab, node.id)
-        if variable == None:
+        if variable is None:
             print "Symbol {0} in line {1} not defined before".format(node.id, node.line - 1)
         else:
-            valueType = self.dispatch(node.expression, tab)
-            if not ttype["="][variable.type].has_key(valueType):
-                #print variable.name, variable.type
-                print "Value of type {0} cannot be assigned to symbol {1} of type {2} (line {3})"\
-                    .format(valueType, node.id, variable.type, node.line - 1)
+            value_type = self.dispatch(node.expression, tab)
+            if not value_type in ttype["="][variable.type]:
+                print "Value of type {0} cannot be assigned to symbol {1} of type {2} (line {3})" \
+                    .format(value_type, node.id, variable.type, node.line - 1)
             else:
-                return ttype["="][variable.type][valueType]
+                return ttype["="][variable.type][value_type]
 
     def visit_Choice(self, node, tab):
         self.dispatch(node._if, tab)
@@ -174,7 +166,7 @@ class TypeChecker(object):
 
     def visit_Const(self, node, tab):
         value = node.value
-        if (value[0] == '"' or value[0] == "'") and (value[len(value) - 1] == '"' or value[len(value) - 1] == "'"):
+        if (value[0] in ('"', "'")) and (value[len(value) - 1] in ('"', "'")):
             return 'string'
         try:
             int(value)
@@ -187,26 +179,21 @@ class TypeChecker(object):
                 print "Value's {0} type is not recognized".format(value)
 
     def visit_Id(self, node, tab):
-        #print "ID:", node.id
         variable = self.findVariable(tab, node.id)
-        if variable == None:
+        if variable is None:
             print "Symbol {0} in line {1} not declared before".format(node.id, node.line)
         else:
             return variable.type
 
     def visit_BinExpr(self, node, tab):
-        try:
-            type1 = self.dispatch(node.expr1, tab)
-            type2 = self.dispatch(node.expr2, tab)
-            op = node.operator
-            #print type1, type2, op
-            return ttype[op][type1][type2]
-        except KeyError:
+        type1 = self.dispatch(node.expr1, tab)
+        type2 = self.dispatch(node.expr2, tab)
+        operator = node.operator
+
+        if not type2 in ttype[operator][type1]:
             print "Incompatible types in line", node.line
-            #raise IncompatibleTypesError
-        except IncompatibleTypesError:
-            pass
-            #raise IncompatibleTypesError
+        else:
+            return ttype[operator][type1][type2]
 
     def visit_ExpressionInParentheses(self, node, tab):
         expression = node.expression
@@ -214,7 +201,7 @@ class TypeChecker(object):
 
     def visit_IdWithParentheses(self, node, tab):
         variable = self.findVariable(tab, node.id)
-        if variable == None:
+        if variable is None:
             print "Symbol {0} in line {1} not declared before".format(node.id, node.line)
         else:
             self.dispatch(node.expression_list, tab)
@@ -238,14 +225,9 @@ class TypeChecker(object):
             self.dispatch(arg, tab)
 
     def visit_Argument(self, node, tab):
-        #print "fun args:", node.id, node.type
-        errorOccured = False
-        for symbol in tab.symbols:
-            if symbol == node.id:
+        if not node.id in tab.symbols:
                 print "Duplicated usage of symbol {0} in line {1}".format(node.id, node.line - 1)
-                errorOccured = True
-                #raise DuplicatedSymbolError
-        if not errorOccured:
+        else:
             tab.put(node.id, VariableSymbol(node.id, node.type, None))
             return node.type
 
