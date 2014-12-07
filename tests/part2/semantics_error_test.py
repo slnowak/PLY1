@@ -37,6 +37,12 @@ int a = 45;
 a = s;
 """
 
+with_wrong_inline_assignment = """
+int a = "string";
+
+a = 15;
+"""
+
 
 class SemanticErrorTest(BaseASTParsingTestClass):
     def test_should_detect_using_undeclared_variable(self):
@@ -64,5 +70,12 @@ class SemanticErrorTest(BaseASTParsingTestClass):
         expected_error_message = """Value of type string cannot be assigned to symbol a of type int (line 5)"""
 
         self._parse_expression(with_wrong_assignment_type)
+
+        self._assert_type_checker_prints_message(expected_error_message)
+
+    def test_should_detect_wrong_inline_assignment(self):
+        expected_error_message = """Value of type string cannot be assigned to symbol a of type int (line 1)"""
+
+        self._parse_expression(with_wrong_inline_assignment)
 
         self._assert_type_checker_prints_message(expected_error_message)

@@ -1,6 +1,5 @@
 __author__ = 'novy'
 
-#!/usr/bin/python
 from src.symbol_table import SymbolTable, VariableSymbol
 
 
@@ -21,11 +20,11 @@ for operator in all_operators():
     for type_ in ['int', 'float', 'string']:
         ttype[operator][type_] = {}
 
-for arithm_op in arithmetic_operators:
-    ttype[arithm_op]['int']['int'] = 'int'
-    ttype[arithm_op]['int']['float'] = 'float'
-    ttype[arithm_op]['float']['int'] = 'float'
-    ttype[arithm_op]['float']['float'] = 'float'
+for arithmetic_operator in arithmetic_operators:
+    ttype[arithmetic_operator]['int']['int'] = 'int'
+    ttype[arithmetic_operator]['int']['float'] = 'float'
+    ttype[arithmetic_operator]['float']['int'] = 'float'
+    ttype[arithmetic_operator]['float']['float'] = 'float'
 ttype['+']['string']['string'] = 'string'
 ttype['*']['string']['int'] = 'string'
 ttype['=']['float']['int'] = 'float'
@@ -42,18 +41,6 @@ for comp_op in comparison_operators:
     ttype[comp_op]['float']['int'] = 'int'
     ttype[comp_op]['float']['float'] = 'int'
     ttype[comp_op]['string']['string'] = 'int'
-
-
-class IncompatibleTypesError(Exception):
-    pass
-
-
-class DuplicatedSymbolError(Exception):
-    pass
-
-
-class SymbolNotDeclaredError(Exception):
-    pass
 
 
 class TypeChecker(object):
@@ -93,6 +80,11 @@ class TypeChecker(object):
     def visit_Init(self, node, tab, type):
         if node.id in tab.symbols:
             print "Duplicated usage of symbol {0} in line {1}".format(node.id, node.line - 1)
+
+        value_type = self.dispatch(node.expression, tab)
+        if not type == value_type:
+            print "Value of type {0} cannot be assigned to symbol {1} of type {2} (line {3})" \
+                .format(value_type, node.id, type, node.line - 1)
         else:
             tab.put(node.id, VariableSymbol(node.id, type, node.expression))
 
@@ -190,7 +182,7 @@ class TypeChecker(object):
         type2 = self.dispatch(node.expr2, tab)
         operator = node.operator
 
-        if not type2 in ttype[operator][type1]:
+        if type1 is None or not type2 in ttype[operator][type1]:
             print "Incompatible types in line", node.line
         else:
             return ttype[operator][type1][type2]
