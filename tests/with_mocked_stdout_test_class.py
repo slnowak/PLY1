@@ -33,4 +33,4 @@ class BaseASTParsingTestClass(unittest.TestCase):
     def _parse_expression(self, expression):
         parser = yacc.yacc(module=self.Cparser)
         ast = parser.parse(expression, lexer=self.Cparser.scanner)
-        TypeChecker().dispatch(ast)
+        TypeChecker().visit(ast)
