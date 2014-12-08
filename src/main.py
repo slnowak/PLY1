@@ -1,7 +1,7 @@
 import sys
 import ply.yacc as yacc
 from parser import Cparser
-from src.type_checker import TypeChecker
+from type_checker import TypeChecker
 import tree_printer
 
 if __name__ == '__main__':
@@ -17,5 +17,5 @@ if __name__ == '__main__':
     parser = yacc.yacc(module=Cparser)
     text = file.read()
     ast = parser.parse(text, lexer=Cparser.scanner)
-    ast.print_tree(0)
-    TypeChecker().dispatch(ast)
+    #ast.print_tree(0)
+    TypeChecker().visit(ast)

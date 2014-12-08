@@ -1,21 +1,37 @@
-float a = 0.0, b = 0.0, c = 0.0;
+float a = 0.0, b = 10.6, c = 0.0;
+int x = 5.5;
+string s = "string";
 
-int gcd(int m, int n) {
-
-int res = 0;
-if (m!=n) {
-    if (m > n)
-        res = gcd(m-n, n);
-    else
-        res = gcd(n-m, m);
+int f( float x ){
+	return x;
 }
-else
-    res = m;
 
-print res;
-return res;
+int gcd(int m, int n, string s) {
+	
+	string w = "konkate" - "nacja";
+
+	int res = 0;
+	if (s == "string"){
+		return asd;
+	}
+
+	if (s == x){
+		return "pp";
+	}
+	if (m!=n) {
+		if (m > n)
+			res = gcd(m-n, n);
+		else
+			res = gcd(n-m, m);
+	}
+	else
+		res = m;
+
+	print res;
+	return res;
 }
 
 while(a >= b ) {
-    a = 1/2*(a+b/a);
+	a = 1/2*(a+b/a);
 }
+
